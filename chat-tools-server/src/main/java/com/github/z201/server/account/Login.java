@@ -52,7 +52,6 @@ public class Login {
             Channel old = ConnPool.query(username);
             if (null != old) {
                 logger.info("你被挤下去了");
-                new Logout(account,old);
             }
             success();
         } else {

@@ -1,5 +1,9 @@
 package com.github.z201.server.handler;
 
+import com.github.z201.common.MsgTools;
+import com.github.z201.common.dto.Message;
+import com.github.z201.common.dto.OnlineAccount;
+import com.github.z201.common.json.Serializer;
 import com.github.z201.server.connection.ConnPool;
 import com.github.z201.common.protocol.MessageHolder;
 import com.github.z201.common.protocol.ProtocolHeader;
@@ -10,6 +14,7 @@ import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -59,6 +64,21 @@ public class HeartbeatHandler extends ChannelInboundHandlerAdapter {
             isLogout.set(false);
             logger.info(name + " 退出登录");
         } else {
+            Iterator<Map.Entry<String, Channel>> iterator = ConnPool.onlineMap.entrySet().iterator();
+            Set<String> nameList = ConnPool.onlineMap.keySet();
+            OnlineAccount onlineAccount = OnlineAccount.builder().onlineAccount(nameList).build();
+            Message message = Message.builder()
+                    .sender("系统")
+                    .content(name + "下线了")
+                    .time(System.currentTimeMillis())
+                    .build();
+            List<Message> list = new ArrayList<>();
+            list.add(message);
+            while (iterator.hasNext()) {
+                Channel channel = iterator.next().getValue();
+                MsgTools.sendMessage(ProtocolHeader.ONLINE_USER_LIST, channel, Serializer.serialize(onlineAccount));
+                MsgTools.sendMessage(ProtocolHeader.ALL_MESSAGE, channel, Serializer.serialize(list));
+            }
             logger.info(name + " 与服务器断开连接");
         }
     }
