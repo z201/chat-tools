@@ -30,7 +30,7 @@
                         <icon>${project.basedir}/package/windows/mybatis-generator-gui.ico</icon>
                         -->
                         <!-- mac打包开启-->
-                        <icon>../package/macosx/icon.icns</icon>
+                        <icon>../ico/macosx/icon.icns</icon>
                     </bundleArguments>
                     <mainClass>com.github.z201.Main</mainClass>
                     <vendor>Z201</vendor>

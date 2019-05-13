@@ -46,7 +46,8 @@ public class CacheManager {
                 .maximumSize(10)
                 .build();
         user.put("test", Account.builder().username("test").password("test").build());
-        user.put("king", Account.builder().username("king").password("king").build());
+        user.put("test1", Account.builder().username("test1").password("test").build());
+        user.put("test2", Account.builder().username("test2").password("test").build());
     }
 
     public Account login(String name) {
