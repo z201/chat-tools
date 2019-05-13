@@ -13,6 +13,7 @@ import com.github.z201.common.dto.Account;
 import com.github.z201.common.dto.Message;
 import com.github.z201.common.json.Serializer;
 import com.github.z201.common.protocol.ProtocolHeader;
+import com.github.z201.utils.KeyUtils;
 import io.netty.channel.Channel;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -120,9 +121,12 @@ public class Controller implements Initializable, ViewI {
 
     public final void sendMsg(ActionEvent actionEvent) {
         String msg = speak.getText();
-        Message message = new Message(account.getUsername(), "", msg, Instant.now().toEpochMilli());
-        MsgTools.request(channel, ProtocolHeader.ALL_MESSAGE, Serializer.serialize(message));
-        speak.clear();
+        if (null != msg && !msg.trim().isEmpty()) {
+            msg = KeyUtils.stripXSS(msg);
+            Message message = new Message(account.getUsername(), "", msg, Instant.now().toEpochMilli());
+            MsgTools.request(channel, ProtocolHeader.ALL_MESSAGE, Serializer.serialize(message));
+            speak.clear();
+        }
     }
 
     // Runs task in JavaFX Thread
@@ -171,7 +175,7 @@ public class Controller implements Initializable, ViewI {
             if (textArea.getLength() > 2000) {
                 textArea.clear();
             }
-            DateTimeFormatter formatter = DateTimeFormatter.BASIC_ISO_DATE;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm:ss");
             String format = formatter.format(LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()));
             String str = format + " | %s \n";
             textArea.appendText(String.format(str, msg));
@@ -183,7 +187,7 @@ public class Controller implements Initializable, ViewI {
         if (textArea.getLength() > 2000) {
             textArea.clear();
         }
-        DateTimeFormatter formatter = DateTimeFormatter.BASIC_ISO_DATE;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm:ss");
         String format = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(msg.getTime()), ZoneId.systemDefault()));
         String str = "\n" + format + "  " + msg.getSender() + " | \n %s ";
         textArea.appendText(String.format(str, msg.getContent()));
