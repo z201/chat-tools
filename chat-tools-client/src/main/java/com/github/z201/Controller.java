@@ -2,7 +2,7 @@ package com.github.z201;
 
 
 import com.github.z201.client.ClientLauncher;
-import com.github.z201.client.MsgTools;
+import com.github.z201.common.MsgTools;
 import com.github.z201.client.SyncFuture;
 import com.github.z201.common.protocol.MessageHolder;
 import com.github.z201.config.ConfigYaml;
@@ -19,16 +19,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -125,16 +120,8 @@ public class Controller implements Initializable, ViewI {
 
     public final void sendMsg(ActionEvent actionEvent) {
         String msg = speak.getText();
-        Message message = new Message(account.getUsername(), "", msg, System.currentTimeMillis());
+        Message message = new Message(account.getUsername(), "", msg, Instant.now().toEpochMilli());
         MsgTools.request(channel, ProtocolHeader.ALL_MESSAGE, Serializer.serialize(message));
-        MessageHolder messageHolder = null;
-        try {
-            messageHolder = SyncFuture.getInstance().get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        Message body = Serializer.deserialize(messageHolder.getBody(), Message.class);
-        consoleMsg(body);
         speak.clear();
     }
 

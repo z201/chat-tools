@@ -1,6 +1,7 @@
 package com.github.z201.server.account;
 
 
+import com.github.z201.common.MsgTools;
 import com.github.z201.common.dto.OnlineAccount;
 import com.github.z201.server.cache.CacheManager;
 import com.github.z201.server.connection.ConnPool;
@@ -48,6 +49,11 @@ public class Login {
         CacheManager cacheManager = CacheManager.getInstance();
         Account account = cacheManager.login(username);
         if (account.getPassword().equals(password)) {
+            Channel old = ConnPool.query(username);
+            if (null != old) {
+                logger.info("你被挤下去了");
+                new Logout(account,old);
+            }
             success();
         } else {
             defeat(ProtocolHeader.REQUEST_ERROR);
@@ -76,16 +82,18 @@ public class Login {
                     Iterator<Map.Entry<String, Channel>> iterator = ConnPool.onlineMap.entrySet().iterator();
                     Set<String> nameList = ConnPool.onlineMap.keySet();
                     OnlineAccount onlineAccount = OnlineAccount.builder().onlineAccount(nameList).build();
-                    sendMessage(ProtocolHeader.ONLINE_USER_LIST, iterator.next().getValue(), Serializer.serialize(onlineAccount));
                     while (iterator.hasNext()) {
+                        Channel channel = iterator.next().getValue();
+                        List<Message> list = new ArrayList<>();
                         Message message = Message.builder()
+                                .sender("系统")
                                 .content(username + "上线了")
                                 .time(System.currentTimeMillis())
                                 .build();
-                        sendMessage(ProtocolHeader.ALL_MESSAGE, iterator.next().getValue(), Serializer.serialize(message));
+                        list.add(message);
+                        MsgTools.sendMessage(ProtocolHeader.ONLINE_USER_LIST, channel, Serializer.serialize(onlineAccount));
+                        MsgTools.sendMessage(ProtocolHeader.ALL_MESSAGE, channel, Serializer.serialize(list));
                     }
-                    // 发送离线消息
-                    sendOfflineMessage();
                 }
             }
         });
@@ -145,40 +153,5 @@ public class Login {
         return channel.writeAndFlush(messageHolder);
     }
 
-    private void sendOfflineMessage() {
-        // 历史消息
-        message();
-    }
 
-    /**
-     * 发送个人离线消息
-     */
-    private void message() {
-        CacheManager cacheManager = CacheManager.getInstance();
-        try {
-            // 查询消息
-            List<Message> offlineMsgs = cacheManager.pullMessage();
-            sendMessage(ProtocolHeader.ALL_MESSAGE, channel, Serializer.serialize(offlineMsgs));
-            logger.info("消息(离线) 发送成功");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    /**
-     * 发送消息
-     *
-     * @param type
-     * @param recChannel
-     * @param body
-     * @return
-     */
-    private Future sendMessage(byte type, Channel recChannel, String body) {
-        MessageHolder messageHolder = new MessageHolder();
-        messageHolder.setSign(ProtocolHeader.NOTICE);
-        messageHolder.setType(type);
-        messageHolder.setStatus((byte) 0);
-        messageHolder.setBody(body);
-        return recChannel.writeAndFlush(messageHolder);
-    }
 }

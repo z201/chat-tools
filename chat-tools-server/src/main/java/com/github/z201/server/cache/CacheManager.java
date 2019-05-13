@@ -5,10 +5,10 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.z201.common.dto.Account;
 import com.github.z201.common.dto.Message;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author z201.coding@gmail.com
@@ -33,9 +33,7 @@ public class CacheManager {
         return single;
     }
 
-    public static final String H_MESSAGE = "H_MESSAGE";
-
-    private Cache<String, List<Message>> historicalNews;
+    private Cache<String, Message> historicalNews;
 
     private Cache<String, Account> user;
 
@@ -56,17 +54,12 @@ public class CacheManager {
     }
 
     public void pushMessage(Message message) {
-        List<Message> messages = historicalNews.get(H_MESSAGE, k -> initMessage());
-        messages.add(message);
-        historicalNews.put(H_MESSAGE, messages);
+        historicalNews.put(message.getTime().toString(), message);
     }
 
     public List<Message> pullMessage() {
-        return historicalNews.get(H_MESSAGE, k -> initMessage());
-    }
-
-    private List<Message> initMessage() {
-        return new ArrayList<>();
+        ConcurrentMap<String, Message> map = historicalNews.asMap();
+        return map.values().stream().collect(Collectors.toList());
     }
 
 

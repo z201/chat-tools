@@ -26,7 +26,9 @@ public class HeartbeatHandler extends ChannelInboundHandlerAdapter {
     private Channel channel;
     private String username;
 
-    // 丢失的心跳数
+    /**
+     * 丢失的心跳数
+     */
     private int counter = 0;
 
     public HeartbeatHandler(Channel channel) {
@@ -51,12 +53,13 @@ public class HeartbeatHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        ConnPool.remove(username);
+        String name = ConnPool.query(ctx.channel());
+        ConnPool.remove(name);
         if (isLogout.get()) {
             isLogout.set(false);
-            logger.info(username + " 退出登录");
+            logger.info(name + " 退出登录");
         } else {
-            logger.info(username + " 与服务器断开连接");
+            logger.info(name + " 与服务器断开连接");
         }
     }
 
@@ -71,7 +74,7 @@ public class HeartbeatHandler extends ChannelInboundHandlerAdapter {
                 logger.info(username + " 收到心跳包");
                 // 心跳丢失清零
                 counter = 0;
-                response(channel,ProtocolHeader.HEARTBEAT);
+                response(channel, ProtocolHeader.HEARTBEAT);
             } else {
                 ctx.fireChannelRead(msg);
             }

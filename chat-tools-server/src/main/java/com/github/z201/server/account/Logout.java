@@ -1,11 +1,23 @@
 package com.github.z201.server.account;
 
+import com.github.z201.common.MsgTools;
+import com.github.z201.common.dto.Message;
+import com.github.z201.common.dto.OnlineAccount;
+import com.github.z201.common.json.Serializer;
+import com.github.z201.common.protocol.MessageHolder;
+import com.github.z201.common.protocol.ProtocolHeader;
+import com.github.z201.server.connection.ConnPool;
 import com.github.z201.server.connection.TokenPool;
 import com.github.z201.common.dto.Account;
 import com.github.z201.server.handler.HeartbeatHandler;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * 登出服务.
@@ -28,11 +40,46 @@ public class Logout {
         TokenPool.remove(account.getToken());
         // 标记为登出状态
         HeartbeatHandler.isLogout.set(true);
-        // 关闭channel
-        try {
-            channel.close().sync();
-        } catch (InterruptedException e) {
-            logger.warn("关闭channel异常", e);
-        }
+
+        Future future = sendResponse(ProtocolHeader.SUCCESS, Serializer.serialize(account));
+        future.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                if (future.isSuccess()) {
+                    Iterator<Map.Entry<String, Channel>> iterator = ConnPool.onlineMap.entrySet().iterator();
+                    Set<String> nameList = ConnPool.onlineMap.keySet();
+                    OnlineAccount onlineAccount = OnlineAccount.builder().onlineAccount(nameList).build();
+                    // 关闭channel
+                    try {
+                        channel.close().sync();
+                    } catch (InterruptedException e) {
+                        logger.warn("关闭channel异常", e);
+                    }
+                    while (iterator.hasNext()) {
+                        Channel channel = iterator.next().getValue();
+                        List<Message> list = new ArrayList<>();
+                        Message message = Message.builder()
+                                .sender("系统")
+                                .content(account.getUsername() + "下线了")
+                                .time(System.currentTimeMillis())
+                                .build();
+                        list.add(message);
+                        MsgTools.sendMessage(ProtocolHeader.ONLINE_USER_LIST, channel, Serializer.serialize(onlineAccount));
+                        MsgTools.sendMessage(ProtocolHeader.ALL_MESSAGE, channel, Serializer.serialize(list));
+                    }
+                }
+            }
+        });
+
+
+    }
+
+    private Future sendResponse(byte status, String body) {
+        MessageHolder messageHolder = new MessageHolder();
+        messageHolder.setSign(ProtocolHeader.RESPONSE);
+        messageHolder.setType(ProtocolHeader.LOGOUT);
+        messageHolder.setStatus(status);
+        messageHolder.setBody(body);
+        return channel.writeAndFlush(messageHolder);
     }
 }

@@ -95,12 +95,4 @@ public class ConnPool {
         return null;
     }
 
-    private static ChannelFuture sendResponse(Channel channel, byte status, String body) {
-        MessageHolder messageHolder = new MessageHolder();
-        messageHolder.setSign(ProtocolHeader.RESPONSE);
-        messageHolder.setType(ProtocolHeader.NOTICE);
-        messageHolder.setStatus(status);
-        messageHolder.setBody(body);
-        return channel.writeAndFlush(messageHolder);
-    }
 }

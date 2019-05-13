@@ -62,14 +62,16 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
                 logger.debug("response body {} ", messageHolder.getBody());
             }
             if (messageHolder.getSign() == ProtocolHeader.NOTICE) {
-                logger.info("response body {} ", messageHolder.getBody());
+
                 if (messageHolder.getType() == ProtocolHeader.ALL_MESSAGE) {
+                    logger.info("ALL_MESSAGE body {} ", messageHolder.getBody());
                     Type type = new TypeToken<List<Message>>() {}.getType();
                     List<Message> messageList = Serializer.getGson().fromJson(messageHolder.getBody(), type);
                     for(Message message : messageList){
                         controller.consoleMsg(message);
                     }
                 }else if(messageHolder.getType() == ProtocolHeader.ONLINE_USER_LIST){
+                    logger.info("ONLINE_USER_LIST body {} ", messageHolder.getBody());
                     OnlineAccount onlineAccount = Serializer.deserialize(messageHolder.getBody(), OnlineAccount.class);
                     // 更新在线列表
                     controller.loadLeftDBTree(onlineAccount.getOnlineAccount());
