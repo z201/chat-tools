@@ -36,6 +36,7 @@
                     <vendor>Z201</vendor>
                     <verbose>false</verbose>
                     <jfxMainAppJarName>that-tools.jar</jfxMainAppJarName>
+                    <appName>that-tools</appName>
                     <needShortcut>true</needShortcut>
                     <needMenu>true</needMenu>
                     <copyAdditionalAppResourcesToJar>true</copyAdditionalAppResourcesToJar>
