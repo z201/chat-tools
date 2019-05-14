@@ -27,7 +27,7 @@
                 <configuration>
                     <bundleArguments>
                         <!-- windows打包开启
-                        <icon>${project.basedir}/package/windows/mybatis-generator-gui.ico</icon>
+                        <icon>../ico/package/windows/icon.ico</icon>
                         -->
                         <!-- mac打包开启-->
                         <icon>../ico/macosx/icon.icns</icon>
