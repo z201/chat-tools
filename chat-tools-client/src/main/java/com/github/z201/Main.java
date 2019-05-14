@@ -8,6 +8,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import javax.swing.*;
 import java.net.URL;
@@ -29,6 +30,7 @@ public class Main extends Application {
         // 设置标题
         primaryStage.setTitle("chat-tools");
         primaryStage.setScene(new Scene(root));
+        primaryStage.initStyle(StageStyle.UTILITY);
         setMaximized();
         primaryStage.show();
     }
