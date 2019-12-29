@@ -7,7 +7,6 @@ import com.github.z201.common.dto.Message;
 import com.github.z201.common.json.Serializer;
 import com.github.z201.common.protocol.MessageHolder;
 import com.github.z201.common.protocol.ProtocolHeader;
-import com.github.z201.server.connection.ConnPool;
 import io.netty.channel.Channel;
 import io.netty.util.ReferenceCountUtil;
 

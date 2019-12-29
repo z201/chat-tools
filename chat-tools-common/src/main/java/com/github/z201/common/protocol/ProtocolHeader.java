@@ -3,7 +3,7 @@ package com.github.z201.common.protocol;
 /**
  * Jelly传输层协议头.
  *
- *                                       Jelly Protocol
+ *                                       Protocol
  *  __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __
  * |           |           |           |           |              |                          |
  *       2           1           1           1            4               Uncertainty

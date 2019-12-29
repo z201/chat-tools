@@ -11,6 +11,13 @@ import io.netty.util.concurrent.Future;
  **/
 public class MsgTools {
 
+    /**
+     * 请求消息
+     * @param channel
+     * @param type
+     * @param body
+     * @return
+     */
     public static ChannelFuture request(Channel channel, byte type, String body) {
         MessageHolder messageHolder = new MessageHolder();
         messageHolder.setSign(ProtocolHeader.REQUEST);

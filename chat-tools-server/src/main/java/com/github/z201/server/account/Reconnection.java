@@ -51,7 +51,6 @@ public class Reconnection {
     /**
      * 信息验证成功
      */
-    @SuppressWarnings("unchecked")
     private void success() {
         // 维护连接
         boolean b = ConnPool.add(username, channel);

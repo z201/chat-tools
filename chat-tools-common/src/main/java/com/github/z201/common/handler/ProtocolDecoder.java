@@ -5,6 +5,7 @@ import com.github.z201.common.protocol.ProtocolHeader;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,20 +32,20 @@ import java.util.List;
  *
  * @author z201.coding@gmail.com.
  */
+@Slf4j
 public class ProtocolDecoder extends ByteToMessageDecoder {
-    private static final Logger logger = LoggerFactory.getLogger(ProtocolDecoder.class);
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         if (in.readableBytes() < ProtocolHeader.HEADER_LENGTH) {
             // 数据包长度小于协议头长度
-            logger.info("数据包长度小于协议头长度");
+            log.info("数据包长度小于协议头长度");
             return;
         }
         in.markReaderIndex();
         if (in.readShort() != ProtocolHeader.MAGIC) {
             // Magic不一致，表明不是自己的数据
-            logger.info("Magic不一致");
+            log.info("Magic不一致");
             in.resetReaderIndex();
             return;
         }
