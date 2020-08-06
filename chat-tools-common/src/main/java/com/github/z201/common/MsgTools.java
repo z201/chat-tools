@@ -4,7 +4,6 @@ import com.github.z201.common.protocol.MessageHolder;
 import com.github.z201.common.protocol.ProtocolHeader;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.util.concurrent.Future;
 
 /**
  * @author z201.coding@gmail.com

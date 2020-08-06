@@ -20,6 +20,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -228,17 +229,16 @@ public class Controller implements Initializable, ViewI {
         this.channel = channel;
     }
 
-    public void loadLeftDBTree(Set<String> users) {
+    public void loadLeftTree(Set<String> users) {
         TreeItem rootTreeItem = onlineUserTableView.getRoot();
         rootTreeItem.getChildren().clear();
         for (String user : users) {
             TreeItem<String> treeItem = new TreeItem<>();
             treeItem.setValue(user);
-//                ImageView dbImage = new ImageView("icons/computer.png");
-//                dbImage.setFitHeight(16);
-//                dbImage.setFitWidth(16);
-//                dbImage.setUserData(dbConfig);
-//                treeItem.setGraphic(dbImage);
+//            ImageView dbImage = new ImageView("icons/computer.png");
+//            dbImage.setFitHeight(16);
+//            dbImage.setFitWidth(16);
+//            treeItem.setGraphic(dbImage);
             rootTreeItem.getChildren().add(treeItem);
         }
 

@@ -40,32 +40,29 @@ public class Logout {
         TokenPool.remove(account.getToken());
         // 标记为登出状态
         HeartbeatHandler.isLogout.set(true);
-        Future future = sendResponse(ProtocolHeader.SUCCESS, Serializer.serialize(account));
-        future.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-                if (future.isSuccess()) {
-                    Iterator<Map.Entry<String, Channel>> iterator = ConnPool.onlineMap.entrySet().iterator();
-                    Set<String> nameList = ConnPool.onlineMap.keySet();
-                    OnlineAccount onlineAccount = OnlineAccount.builder().onlineAccount(nameList).build();
-                    // 关闭channel
-                    try {
-                        channel.close().sync();
-                    } catch (InterruptedException e) {
-                        logger.warn("关闭channel异常", e);
-                    }
-                    Message message = Message.builder()
-                            .sender("系统")
-                            .content(account.getUsername() + "下线了")
-                            .time(System.currentTimeMillis())
-                            .build();
-                    while (iterator.hasNext()) {
-                        Channel channel = iterator.next().getValue();
-                        List<Message> list = new ArrayList<>();
-                        list.add(message);
-                        MsgTools.sendMessage(ProtocolHeader.ONLINE_USER_LIST, channel, Serializer.serialize(onlineAccount));
-                        MsgTools.sendMessage(ProtocolHeader.ALL_MESSAGE, channel, Serializer.serialize(list));
-                    }
+        Future futureResponse = sendResponse(ProtocolHeader.SUCCESS, Serializer.serialize(account));
+        futureResponse.addListener((ChannelFutureListener) future -> {
+            if (future.isSuccess()) {
+                Iterator<Map.Entry<String, Channel>> iterator = ConnPool.onlineMap.entrySet().iterator();
+                Set<String> nameList = ConnPool.onlineMap.keySet();
+                OnlineAccount onlineAccount = OnlineAccount.builder().onlineAccount(nameList).build();
+                // 关闭channel
+                try {
+                    channel.close().sync();
+                } catch (InterruptedException e) {
+                    logger.warn("关闭channel异常", e);
+                }
+                Message message = Message.builder()
+                        .sender("系统")
+                        .content(account.getUsername() + "下线了")
+                        .time(System.currentTimeMillis())
+                        .build();
+                while (iterator.hasNext()) {
+                    Channel channel = iterator.next().getValue();
+                    List<Message> list = new ArrayList<>();
+                    list.add(message);
+                    MsgTools.sendMessage(ProtocolHeader.ONLINE_USER_LIST, channel, Serializer.serialize(onlineAccount));
+                    MsgTools.sendMessage(ProtocolHeader.ALL_MESSAGE, channel, Serializer.serialize(list));
                 }
             }
         });

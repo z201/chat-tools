@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
-import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -62,7 +61,6 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
                 logger.debug("response body {} ", messageHolder.getBody());
             }
             if (messageHolder.getSign() == ProtocolHeader.NOTICE) {
-
                 if (messageHolder.getType() == ProtocolHeader.ALL_MESSAGE) {
                     logger.info("ALL_MESSAGE body {} ", messageHolder.getBody());
                     Type type = new TypeToken<List<Message>>() {}.getType();
@@ -74,7 +72,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
                     logger.info("ONLINE_USER_LIST body {} ", messageHolder.getBody());
                     OnlineAccount onlineAccount = Serializer.deserialize(messageHolder.getBody(), OnlineAccount.class);
                     // 更新在线列表
-                    controller.loadLeftDBTree(onlineAccount.getOnlineAccount());
+                    controller.loadLeftTree(onlineAccount.getOnlineAccount());
                 }
             } else {
                 syncFuture.setResponse(messageHolder);
