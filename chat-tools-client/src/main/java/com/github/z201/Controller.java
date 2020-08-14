@@ -3,8 +3,6 @@ package com.github.z201;
 
 import com.github.z201.client.ClientLauncher;
 import com.github.z201.common.MsgTools;
-import com.github.z201.client.SyncFuture;
-import com.github.z201.common.protocol.MessageHolder;
 import com.github.z201.config.ConfigYaml;
 import com.github.z201.core.GuiContext;
 import com.github.z201.core.GuiDict;
@@ -20,7 +18,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,5 +1,6 @@
 package com.github.z201.server.handler;
 
+import com.github.z201.common.MsgTools;
 import com.github.z201.common.protocol.MessageHolder;
 import com.github.z201.common.protocol.ProtocolHeader;
 import com.github.z201.server.queue.TaskQueue;
@@ -38,25 +39,12 @@ public class AcceptorHandler extends ChannelInboundHandlerAdapter {
                 // 服务器繁忙
                 logger.warn("服务器繁忙，拒绝服务");
                 // 繁忙响应
-                response(ctx.channel(), messageHolder.getSign());
+                MsgTools.busyResponse(ctx.channel(), messageHolder.getSign());
             }
         } else {
             throw new IllegalArgumentException("msg is not instance of MessageHolder");
         }
     }
 
-    /**
-     * 服务器繁忙响应
-     *
-     * @param channel
-     * @param sign
-     */
-    private void response(Channel channel, byte sign) {
-        MessageHolder messageHolder = new MessageHolder();
-        messageHolder.setSign(ProtocolHeader.RESPONSE);
-        messageHolder.setType(sign);
-        messageHolder.setStatus(ProtocolHeader.SERVER_BUSY);
-        messageHolder.setBody("");
-        channel.writeAndFlush(messageHolder);
-    }
+
 }

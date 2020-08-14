@@ -46,7 +46,7 @@ public class ProtocolHeader {
     public static final byte LOGOUT                = 0x13;    // 登出
     public static final byte ALL_MESSAGE           = 0x14;    // 消息
     public static final byte ONLINE_USER_LIST      = 0x21;    // 获取用户列表
-    public static final byte RECONN                = 0x22;    // 重连
+    public static final byte RECONNCET             = 0x22;    // 重连
     public static final byte HEARTBEAT             = 0x23;    // 心跳
 
     /** 响应状态 */

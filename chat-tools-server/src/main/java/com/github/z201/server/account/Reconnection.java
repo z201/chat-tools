@@ -1,5 +1,6 @@
 package com.github.z201.server.account;
 
+import com.github.z201.common.MsgTools;
 import com.github.z201.server.connection.ConnPool;
 import com.github.z201.server.connection.TokenFactory;
 import com.github.z201.server.connection.TokenPool;
@@ -58,7 +59,7 @@ public class Reconnection {
         Account acc = new Account();
         acc.setUsername(username);
         acc.setToken(init());
-        Future future = sendResponse(ProtocolHeader.SUCCESS, Serializer.serialize(acc));
+        Future future = MsgTools.sendReconnectResponse(channel, ProtocolHeader.SUCCESS, Serializer.serialize(acc));
         future.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
@@ -81,25 +82,18 @@ public class Reconnection {
     @SuppressWarnings("unchecked")
     private void defeat(byte status) {
         // 发送响应数据包
-        Future future = sendResponse(status, "");
-        future.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-                if (future.isSuccess()) {
-                    logger.info(username + " 重连失败");
-                    channel.close().sync();
-                } else {
-                    sendResponse(status, "").addListener(new ChannelFutureListener() {
-                        @Override
-                        public void operationComplete(ChannelFuture future) throws Exception {
-                            if (future.isSuccess()) {
-                                logger.info(username + " 重连失败");
-                                channel.close().sync();
-                            }
-                        }
-                    });
-                }
-
+        Future future = MsgTools.sendReconnectResponse(channel, status, "");
+        future.addListener((ChannelFutureListener) future1 -> {
+            if (future1.isSuccess()) {
+                logger.info(username + " 重连失败");
+                channel.close().sync();
+            } else {
+                MsgTools.sendReconnectResponse(channel, status, "").addListener((ChannelFutureListener) future11 -> {
+                    if (future11.isSuccess()) {
+                        logger.info(username + " 重连失败");
+                        channel.close().sync();
+                    }
+                });
             }
         });
     }
@@ -120,13 +114,5 @@ public class Reconnection {
         return token;
     }
 
-    private Future sendResponse(byte status, String body) {
-        MessageHolder messageHolder = new MessageHolder();
-        messageHolder.setSign(ProtocolHeader.RESPONSE);
-        messageHolder.setType(ProtocolHeader.RECONN);
-        messageHolder.setStatus(status);
-        messageHolder.setBody(body);
-        return channel.writeAndFlush(messageHolder);
-    }
 
 }

@@ -11,10 +11,8 @@ import com.github.z201.common.dto.Account;
 import com.github.z201.common.dto.Message;
 import com.github.z201.server.handler.HeartbeatHandler;
 import com.github.z201.common.json.Serializer;
-import com.github.z201.common.protocol.MessageHolder;
 import com.github.z201.common.protocol.ProtocolHeader;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
@@ -68,31 +66,28 @@ public class Login {
         Account acc = new Account();
         acc.setUsername(username);
         acc.setToken(token);
-        Future future = sendResponse(ProtocolHeader.SUCCESS, Serializer.serialize(acc));
-        future.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-                if (future.isSuccess()) {
-                    logger.info(username + " 登录成功");
-                    // 开启心跳检测
-                    logger.info(username + " 开启心跳检测");
-                    channel.pipeline().addAfter("IdleStateHandler",
-                            "HeartbeatHandler", new HeartbeatHandler(channel));
-                    Iterator<Map.Entry<String, Channel>> iterator = ConnPool.onlineMap.entrySet().iterator();
-                    Set<String> nameList = ConnPool.onlineMap.keySet();
-                    OnlineAccount onlineAccount = OnlineAccount.builder().onlineAccount(nameList).build();
-                    while (iterator.hasNext()) {
-                        Channel channel = iterator.next().getValue();
-                        List<Message> list = new ArrayList<>();
-                        Message message = Message.builder()
-                                .sender("系统")
-                                .content(username + "上线了")
-                                .time(System.currentTimeMillis())
-                                .build();
-                        list.add(message);
-                        MsgTools.sendMessage(ProtocolHeader.ONLINE_USER_LIST, channel, Serializer.serialize(onlineAccount));
-                        MsgTools.sendMessage(ProtocolHeader.ALL_MESSAGE, channel, Serializer.serialize(list));
-                    }
+        Future future = MsgTools.sendLoginResponse(channel, ProtocolHeader.SUCCESS, Serializer.serialize(acc));
+        future.addListener((ChannelFutureListener) future1 -> {
+            if (future1.isSuccess()) {
+                logger.info(username + " 登录成功");
+                // 开启心跳检测
+                logger.info(username + " 开启心跳检测");
+                channel.pipeline().addAfter("IdleStateHandler",
+                        "HeartbeatHandler", new HeartbeatHandler(channel));
+                Iterator<Map.Entry<String, Channel>> iterator = ConnPool.onlineMap.entrySet().iterator();
+                Set<String> nameList = ConnPool.onlineMap.keySet();
+                OnlineAccount onlineAccount = OnlineAccount.builder().onlineAccount(nameList).build();
+                while (iterator.hasNext()) {
+                    Channel channel = iterator.next().getValue();
+                    List<Message> list = new ArrayList<>();
+                    Message message = Message.builder()
+                            .sender("系统")
+                            .content(username + "上线了")
+                            .time(System.currentTimeMillis())
+                            .build();
+                    list.add(message);
+                    MsgTools.sendMessage(ProtocolHeader.ONLINE_USER_LIST, channel, Serializer.serialize(onlineAccount));
+                    MsgTools.sendMessage(ProtocolHeader.ALL_MESSAGE, channel, Serializer.serialize(list));
                 }
             }
         });
@@ -105,24 +100,11 @@ public class Login {
      */
     private void defeat(byte status) {
         // 发送响应数据包
-        Future future = sendResponse(status, "");
-        future.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-                if (future.isSuccess()) {
-                    logger.info(username + " 登录失败");
-                    channel.close().sync();
-                } else {
-                    sendResponse(status, "").addListener(new ChannelFutureListener() {
-                        @Override
-                        public void operationComplete(ChannelFuture future) throws Exception {
-                            if (future.isSuccess()) {
-                                logger.info(username + " 登录失败");
-                                channel.close().sync();
-                            }
-                        }
-                    });
-                }
+        Future future = MsgTools.sendLoginResponse(channel, status, "");
+        future.addListener((ChannelFutureListener) future1 -> {
+            if (future1.isSuccess()) {
+                logger.info(username + " 登录失败");
+                channel.close().sync();
             }
         });
     }
@@ -141,15 +123,6 @@ public class Login {
         // 维护token
         TokenPool.getInstance().add(token);
         return token;
-    }
-
-    private Future sendResponse(byte status, String body) {
-        MessageHolder messageHolder = new MessageHolder();
-        messageHolder.setSign(ProtocolHeader.RESPONSE);
-        messageHolder.setType(ProtocolHeader.LOGIN);
-        messageHolder.setStatus(status);
-        messageHolder.setBody(body);
-        return channel.writeAndFlush(messageHolder);
     }
 
 

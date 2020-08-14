@@ -1,7 +1,7 @@
 package com.github.z201.hander;
 
-import com.github.z201.client.SyncFuture;
 import com.github.z201.Controller;
+import com.github.z201.common.SyncFuture;
 import com.github.z201.common.dto.Message;
 import com.github.z201.common.dto.OnlineAccount;
 import com.github.z201.common.json.Serializer;

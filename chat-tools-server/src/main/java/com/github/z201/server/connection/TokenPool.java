@@ -53,11 +53,10 @@ public class TokenPool {
 
     }
 
-    // 用于存放已生成的token
     /**
-     *
+     * 用于存放已生成的token
      */
-    private volatile Set<Long> tokenSet = new CopyOnWriteArraySet<>();
+    private volatile static Set<Long> tokenSet = new HashSet<>();
 
     /**
      * 添加token

@@ -1,6 +1,7 @@
 package com.github.z201.client;
 
 import com.github.z201.common.MsgTools;
+import com.github.z201.common.SyncFuture;
 import com.github.z201.hander.ClientHandler;
 import com.github.z201.hander.ClientHeartbeatHandler;
 import com.github.z201.Controller;
@@ -69,19 +70,16 @@ public class ClientLauncher {
                 controller.changeStateSelected(true);
             }
             MsgTools.request(channelFuture.channel(), ProtocolHeader.LOGIN, Serializer.serialize(account));
-            MessageHolder messageHolder = null;
-            try {
-                messageHolder = SyncFuture.getInstance().get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            MessageHolder messageHolder = (MessageHolder) SyncFuture.getInstance().get();
             if (messageHolder.getSign() == ProtocolHeader.RESPONSE) {
                 if (messageHolder.getStatus() == ProtocolHeader.SUCCESS) {
                     Account account = Serializer.deserialize(messageHolder.getBody(), Account.class);
                     controller.setAccount(account);
                     controller.setChannel(messageHolder.getChannel());
-                    messageHolder.getChannel().pipeline().addAfter("IdleStateHandler",
-                            "ClientHeartbeatHandler", new ClientHeartbeatHandler(messageHolder.getChannel(), controller, account.getUsername()));
+                    messageHolder.getChannel().pipeline()
+                            .addAfter("IdleStateHandler",
+                            "ClientHeartbeatHandler",
+                                    new ClientHeartbeatHandler(messageHolder.getChannel(), controller, account.getUsername()));
                 }
             }
         } catch (InterruptedException e) {

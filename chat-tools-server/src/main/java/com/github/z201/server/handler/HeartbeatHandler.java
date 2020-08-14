@@ -94,25 +94,11 @@ public class HeartbeatHandler extends ChannelInboundHandlerAdapter {
                 logger.info(username + " 收到心跳包");
                 // 心跳丢失清零
                 counter = 0;
-                response(channel, ProtocolHeader.HEARTBEAT);
+                MsgTools.response(channel, ProtocolHeader.HEARTBEAT);
             } else {
                 ctx.fireChannelRead(msg);
             }
         }
     }
 
-    /**
-     * 服务器繁忙响应
-     *
-     * @param channel
-     * @param type
-     */
-    private void response(Channel channel, byte type) {
-        MessageHolder messageHolder = new MessageHolder();
-        messageHolder.setSign(ProtocolHeader.RESPONSE);
-        messageHolder.setType(type);
-        messageHolder.setStatus(ProtocolHeader.SUCCESS);
-        messageHolder.setBody("");
-        channel.writeAndFlush(messageHolder);
-    }
 }
