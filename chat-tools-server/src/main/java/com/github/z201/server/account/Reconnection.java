@@ -39,7 +39,7 @@ public class Reconnection {
      */
     public void deal() {
         // 验证token
-        if (TokenPool.query(token)) {
+        if (TokenPool.getInstance().query(token)) {
             success();
         } else {
             // token验证失败
@@ -116,7 +116,7 @@ public class Reconnection {
         // 维护连接
         ConnPool.add(username, channel);
         // 维护token
-        TokenPool.add(token);
+        TokenPool.getInstance().add(token);
         return token;
     }
 

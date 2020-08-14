@@ -37,7 +37,7 @@ public class Logout {
 
     public void deal() {
         // 移除维护的连接和token
-        TokenPool.remove(account.getToken());
+        TokenPool.getInstance().remove(account.getToken());
         // 标记为登出状态
         HeartbeatHandler.isLogout.set(true);
         Future futureResponse = sendResponse(ProtocolHeader.SUCCESS, Serializer.serialize(account));
@@ -66,8 +66,6 @@ public class Logout {
                 }
             }
         });
-
-
     }
 
     private Future sendResponse(byte status, String body) {

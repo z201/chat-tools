@@ -139,7 +139,7 @@ public class Login {
         // 维护连接
         ConnPool.add(username, channel);
         // 维护token
-        TokenPool.add(token);
+        TokenPool.getInstance().add(token);
         return token;
     }
 

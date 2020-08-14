@@ -33,6 +33,7 @@ public class CacheManager {
         return single;
     }
 
+
     private Cache<String, Message> historicalNews;
 
     private Cache<String, Account> user;

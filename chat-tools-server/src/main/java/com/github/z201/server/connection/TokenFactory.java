@@ -35,6 +35,6 @@ public class TokenFactory {
     }
 
     private boolean isExist(Long token) {
-        return TokenPool.query(token);
+        return TokenPool.getInstance().query(token);
     }
 }
