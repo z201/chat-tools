@@ -11,15 +11,11 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
  */
 public class Launcher {
     public static void main(String[] args) {
-        start();
-    }
-
-    public static void start() {
-        // 启动服务
         new Service().initAndStart();
         NettyConfig config = new NettyConfigImpl();
         config.setChannel(NioServerSocketChannel.class);
         config.setHandler();
         config.bind(20000);
     }
+
 }
