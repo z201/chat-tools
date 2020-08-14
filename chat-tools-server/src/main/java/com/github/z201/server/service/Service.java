@@ -5,9 +5,7 @@ import com.github.z201.server.queue.TaskQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -20,11 +18,17 @@ public class Service {
 
     public static AtomicBoolean shutdown = new AtomicBoolean(false);
 
-    // 任务队列
+    /**
+     * 任务队列
+     */
     private BlockingQueue<MessageHolder> taskQueue;
-    // 阻塞式地从taskQueue取MessageHolder
+    /**
+     * 阻塞式地从taskQueue取MessageHolder
+     */
     private ExecutorService takeExecutor;
-    // 执行业务的线程池
+    /**
+     * 执行业务的线程池
+     */
     private ExecutorService taskExecutor;
 
     public void initAndStart() {
@@ -33,8 +37,12 @@ public class Service {
     }
 
     private void init() {
-        takeExecutor = Executors.newSingleThreadExecutor();
-        taskExecutor = Executors.newFixedThreadPool(10);
+        takeExecutor = new ThreadPoolExecutor(1, 1,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>());
+        taskExecutor = new ThreadPoolExecutor(10, 10,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>());
         taskQueue = TaskQueue.getQueue();
         logger.info("初始化服务完成");
     }
